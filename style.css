@@ -1,0 +1,62 @@
+body {
+      font-family: Arial, sans-serif;
+      background: #f8f9fa;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    #calendar {
+      width: 1000px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      min-height: 800px;
+    }
+    .fc-event-title {
+      white-space: normal !important;
+      word-wrap: break-word;
+      font-size: 13px;
+    }
+    .fc-event {
+      border-radius: 6px;
+      padding: 2px 4px;
+      transition: transform 0.2s ease;
+    }
+    .fc-event:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+      z-index: 1000;
+    }
+    #filters {
+      width: 250px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      height: fit-content;
+    }
+    #filters h3 {
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    #filters button {
+      margin-bottom: 5px;
+      padding: 4px 8px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .filter-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+      gap: 5px;
+      font-size: 14px;
+    }
+    .filter-color {
+      width: 15px;
+      height: 15px;
+      border-radius: 3px;
+      display: inline-block;
+    }
