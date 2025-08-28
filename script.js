@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const professorColors = {};
   const activeProfessors = new Set();
   let allEvents = [];
+  let professorStays = {};
 
   function generateColor(str) {
     let hash = 0;
@@ -42,6 +43,10 @@ document.addEventListener("DOMContentLoaded", function () {
       rows.slice(1).forEach(row => {
         const professor = cleanText(row[0]);
         const stays = row.slice(1).filter(Boolean).map(cleanText);
+        
+        if (!professorStays[professor]) {
+            professorStays[professor] = [];
+        }
 
         if (!professorColors[professor]) {
           professorColors[professor] = generateColor(professor);
@@ -61,8 +66,9 @@ document.addEventListener("DOMContentLoaded", function () {
               end: end,
               color: professorColors[professor],
               allDay: true,
-              extendedProps: { professor }
+              extendedProps: { professor, stay }
             });
+            professorStays[professor].push({ start: startStr, end: endStr });
           } catch (e) {
             console.warn("Erreur parsing :", stay, e);
           }
@@ -74,15 +80,25 @@ document.addEventListener("DOMContentLoaded", function () {
         locale: "fr",
         height: "auto",
         expandRows: true,
+        weekends: false, 
         headerToolbar: {
           left: "prev,next today",
           center: "title",
-          right: "dayGridMonth,timeGridWeek,listWeek"
+          right: "dayGridMonth,listMonth"
         },
         events: (info, successCallback) => {
           successCallback(
             allEvents.filter(e => activeProfessors.has(e.extendedProps.professor))
           );
+        },
+        eventClick: function(info) {
+            const profName = info.event.extendedProps.professor;
+            const stays = professorStays[profName];
+            let message = `Séjours pour ${profName}:\n\n`;
+            stays.forEach(stay => {
+                message += `• Du ${stay.start} au ${stay.end}\n`;
+            });
+            alert(message);
         }
       });
 
@@ -108,6 +124,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Tout sélectionner / Tout désélectionner
       document.getElementById("selectAll").addEventListener("click", () => {
+        activeProfessors.clear();
         Object.keys(professorColors).forEach(prof => {
           activeProfessors.add(prof);
           document.getElementById(`chk-${prof}`).checked = true;
@@ -120,6 +137,30 @@ document.addEventListener("DOMContentLoaded", function () {
         Object.keys(professorColors).forEach(prof => {
           document.getElementById(`chk-${prof}`).checked = false;
         });
+        calendar.refetchEvents();
+      });
+
+      // Nouveau bouton pour filtrer la semaine du 1er au 5 septembre
+      document.getElementById("filterThisWeek").addEventListener("click", () => {
+        // Désélectionner tous les professeurs avant d'appliquer le nouveau filtre
+        activeProfessors.clear();
+        Object.keys(professorColors).forEach(prof => {
+          document.getElementById(`chk-${prof}`).checked = false;
+        });
+
+        const startDate = new Date('2025-09-01');
+        const endDate = new Date('2025-09-06'); // Fin exclusive
+
+        allEvents.forEach(event => {
+          const eventStart = new Date(event.start);
+          if (eventStart >= startDate && eventStart < endDate) {
+            activeProfessors.add(event.extendedProps.professor);
+            if (document.getElementById(`chk-${event.extendedProps.professor}`)) {
+                document.getElementById(`chk-${event.extendedProps.professor}`).checked = true;
+            }
+          }
+        });
+
         calendar.refetchEvents();
       });
     });
