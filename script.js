@@ -30,9 +30,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const monthFilter = document.getElementById("monthFilter");
   const professorSearch = document.getElementById("professorSearch");
 
-  // Définir la vue initiale sur "Liste" qui est la vue par défaut
-  calendarEl.style.display = "none";
-  customListViewEl.style.display = "block";
+  // Définir la vue initiale sur "Calendrier"
+  calendarEl.style.display = "block";
+  customListViewEl.style.display = "none";
 
   const courseModal = document.getElementById("courseModal");
   const modalTitle = document.getElementById("modal-title");
@@ -126,11 +126,6 @@ document.addEventListener("DOMContentLoaded", function () {
         item.style.display = 'none';
       }
     });
-
-    // Si la vue en liste est active, on la met à jour aussi pour refléter la recherche.
-    if (customListViewEl.style.display === "block") {
-      generateMonthlyListView();
-    }
   }
 
   // Fonction pour charger les données des cours à partir d'un fichier local
@@ -230,12 +225,10 @@ document.addEventListener("DOMContentLoaded", function () {
   function generateMonthlyListView() {
     customListViewEl.innerHTML = '';
     const selectedMonth = monthFilter.value;
-    const searchTerm = professorSearch.value.toLowerCase();
     const months = {};
 
     Object.keys(professorStays).forEach(prof => {
-      // On filtre par professeur actif (case cochée) ET par le terme de recherche
-      if (activeProfessors.has(prof) && prof.toLowerCase().includes(searchTerm)) {
+      if (activeProfessors.has(prof)) {
         const hasCourses = professorCourses[prof] && professorCourses[prof].length > 0;
         console.log(`[Vue Liste] Vérification pour "${prof}". Des cours ont-ils été trouvés ? -> ${hasCourses}`);
         const stays = professorStays[prof];
@@ -559,9 +552,7 @@ document.addEventListener("DOMContentLoaded", function () {
           if (e.target.checked) activeProfessors.add(prof);
           else activeProfessors.delete(prof);
           calendar.refetchEvents();
-          if (customListViewEl.style.display === "block") {
-            generateMonthlyListView();
-          }
+          // La vue en liste n'est plus gérée, donc on ne fait rien ici.
         });
       });
 
@@ -576,9 +567,6 @@ document.addEventListener("DOMContentLoaded", function () {
           document.getElementById(`chk-${prof}`).checked = true;
         });
         calendar.refetchEvents();
-        if (customListViewEl.style.display === "block") {
-          generateMonthlyListView();
-        }
       });
 
       document.getElementById("deselectAll").addEventListener("click", () => {
@@ -587,18 +575,6 @@ document.addEventListener("DOMContentLoaded", function () {
           document.getElementById(`chk-${prof}`).checked = false;
         });
         calendar.refetchEvents();
-        if (customListViewEl.style.display === "block") {
-          generateMonthlyListView();
-        }
-      });
-
-      // Logique pour afficher la vue de liste personnalisée
-      document.getElementById("showListView").addEventListener("click", () => {
-        calendarEl.style.display = "none";
-        customListViewEl.style.display = "block";
-        document.getElementById("showListView").classList.add("active");
-        document.getElementById("showCalendarView").classList.remove("active");
-        generateMonthlyListView();
       });
 
       // Logique pour revenir à la vue du calendrier
@@ -606,13 +582,12 @@ document.addEventListener("DOMContentLoaded", function () {
         calendarEl.style.display = "block";
         customListViewEl.style.display = "none";
         document.getElementById("showCalendarView").classList.add("active");
-        document.getElementById("showListView").classList.remove("active");
-
-         setTimeout(() => calendar.updateSize(), 10); 
+        setTimeout(() => calendar.updateSize(), 10); 
       });
 
-      // Écouteur d'événement pour le changement de mois
-      monthFilter.addEventListener("change", generateMonthlyListView);
+      // Le filtre par mois et les clics sur les cartes ne sont plus nécessaires
+      // dans la vue Calendrier. J'ai donc commenté ces lignes.
+      // monthFilter.addEventListener("change", generateMonthlyListView);
 
       // Fermer la modal
       closeButton.addEventListener('click', () => {
@@ -624,42 +599,6 @@ document.addEventListener("DOMContentLoaded", function () {
           courseModal.classList.remove('active');
         }
       });
-
-      // Gérer les clics sur les boutons via la délégation d'événements
-      customListViewEl.addEventListener('click', (event) => {
-        const listButton = event.target.closest('.view-courses-list-btn');
-        if (listButton) {
-          const profName = listButton.dataset.prof;
-          if (profName) {
-            showCourses(profName); // Affiche la liste
-          }
-          return;
-        }
-
-        const calendarButton = event.target.closest('.view-courses-calendar-btn');
-        if (calendarButton) {
-          const profName = calendarButton.dataset.prof;
-          if (profName) {
-            showCourseCalendar(profName); // Affiche le calendrier
-          }
-          return;
-        }
-
-        const staysCalendarButton = event.target.closest('.view-stays-calendar-btn');
-        if (staysCalendarButton) {
-          const profName = staysCalendarButton.dataset.prof;
-          if (profName) {
-            showStayCalendar(profName);
-          }
-        }
-      });
-
-      // Appeler les fonctions au chargement initial
-      populateMonthFilter();
-      // Si la vue en liste est affichée par défaut, on la génère immédiatement.
-      if (customListViewEl.style.display === "block") {
-        generateMonthlyListView();
-      }
     })
     .catch(error => {
       console.error("Erreur lors du chargement des données:", error);
