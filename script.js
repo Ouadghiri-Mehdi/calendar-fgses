@@ -126,6 +126,11 @@ document.addEventListener("DOMContentLoaded", function () {
         item.style.display = 'none';
       }
     });
+
+    // Si la vue en liste est active, on la met à jour aussi pour refléter la recherche.
+    if (customListViewEl.style.display === "block") {
+      generateMonthlyListView();
+    }
   }
 
   // Fonction pour charger les données des cours à partir d'un fichier local
@@ -225,10 +230,12 @@ document.addEventListener("DOMContentLoaded", function () {
   function generateMonthlyListView() {
     customListViewEl.innerHTML = '';
     const selectedMonth = monthFilter.value;
+    const searchTerm = professorSearch.value.toLowerCase();
     const months = {};
 
     Object.keys(professorStays).forEach(prof => {
-      if (activeProfessors.has(prof)) {
+      // On filtre par professeur actif (case cochée) ET par le terme de recherche
+      if (activeProfessors.has(prof) && prof.toLowerCase().includes(searchTerm)) {
         const hasCourses = professorCourses[prof] && professorCourses[prof].length > 0;
         console.log(`[Vue Liste] Vérification pour "${prof}". Des cours ont-ils été trouvés ? -> ${hasCourses}`);
         const stays = professorStays[prof];
